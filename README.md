@@ -36,6 +36,6 @@ Using F1-score, precision, recall, Roc curve to compare the performance of the a
 ### Directory description
 **dataset** - store the training data marketing_campaign.csv.  
 **src/main/scala/classificationTask** - for the purpose of classification task.  
-**src/main/scala/classificationTask** - for the purpose of cluster task. 
+**src/main/scala/clusterTask** - for the purpose of cluster task. 
  
 
