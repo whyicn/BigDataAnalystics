@@ -1,11 +1,12 @@
 package classificationTask
 
-import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.linalg.Vectors
-import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.mllib.evaluation.{BinaryClassificationMetrics, MulticlassMetrics}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{col, input_file_name, regexp_extract, udf}
 
@@ -22,60 +23,49 @@ object RandomForestTree {
     val personality = spark.read.format("csv")
       .option("header", "true")
       .option("inferSchema", "true")
-      .load("dataset/marketing_campaign.csv")
+      .load("dataset/marketing_campaign_cleaned_classification_3.csv")
+    val Array(trainingData, testData) = personality.randomSplit(Array(0.7, 0.3))
 
     personality.show()
 
-    val label = "Response"
-
-    val categoricalColumns = Array("Marital_Status", "Education")
-
-    val categoricalIndexers = categoricalColumns.map { colName =>
-      new StringIndexer()
-        .setInputCol(colName)
-        .setOutputCol(s"${colName}_indexed")
-    }
-
+    val label = "Income"
     val assembler = new VectorAssembler()
-      .setInputCols(categoricalColumns.map(_ + "_indexed") ++ Array(label))
+      .setInputCols(personality.columns.filter(_ != label))
       .setOutputCol("features")
 
-    val Array(trainingData, testData) = personality.randomSplit(Array(0.7, 0.3))
-
     val rf = new RandomForestClassifier()
-      .setLabelCol("Response")
       .setFeaturesCol("features")
+      .setLabelCol(label)
       .setNumTrees(10)
+      .setMaxDepth(5)
 
     val pipeline = new Pipeline()
-      .setStages(categoricalIndexers ++ Array(assembler, rf))
+      .setStages(Array(assembler, rf))
 
-    val model = pipeline.fit(trainingData)
-
-    val predictions = model.transform(testData)
-
-    println("==================")
-    predictions.show()
-    println("==================")
-
-    val predictionAndLabels = model.transform(personality).select("prediction", label).rdd.map(row => (row.getDouble(0), row.getInt(1).toDouble))
-
-    val metrics = new BinaryClassificationMetrics(predictionAndLabels)
-    println(s"Area under ROC curve = ${metrics.areaUnderROC()}")
+    val paramGrid = new ParamGridBuilder()
+      .addGrid(rf.numTrees, Array(10, 20))
+      .addGrid(rf.maxDepth, Array(5, 10))
+      .build()
 
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol(label)
       .setPredictionCol("prediction")
-      .setMetricName("weightedPrecision")
+      .setMetricName("accuracy")
 
-    println(s"Weighted precision = ${evaluator.evaluate(predictions)}")
+    val cv = new CrossValidator()
+      .setEstimator(pipeline)
+      .setEvaluator(evaluator)
+      .setEstimatorParamMaps(paramGrid)
+      .setNumFolds(3)
 
-    evaluator.setMetricName("weightedRecall")
-    println(s"Weighted recall = ${evaluator.evaluate(predictions)}")
+    val cvModel = cv.fit(personality)
 
-    evaluator.setMetricName("f1")
-    println(s"F1 score = ${evaluator.evaluate(predictions)}")
+    val bestModel = cvModel.bestModel.asInstanceOf[PipelineModel]
+    val rfModel = bestModel.stages.last.asInstanceOf[RandomForestClassificationModel]
 
+    println(s"Accuracy: ${evaluator.evaluate(cvModel.transform(testData))}")
+    println(s"Number of trees: ${rfModel.getNumTrees}")
+    println(s"Max depth: ${rfModel.getMaxDepth}")
 
     spark.stop()
 
