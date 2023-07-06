@@ -37,7 +37,7 @@ object RandomForestTree {
     val label_2 = personality.filter(col(label) === 2)
     val smallestClassSize = Seq(label_0.count(), label_1.count(), label_2.count()).min
     val balancedData = label_0.limit(smallestClassSize.toInt).union(label_1.limit(smallestClassSize.toInt)).union(label_2.limit(smallestClassSize.toInt))
-    balancedData.write.format("csv").option("header",1).option("path", "dataset/marketing_campaign_balanced_classification.csv").save()
+    //balancedData.write.format("csv").option("header",1).option("path", "dataset/marketing_campaign_balanced_classification.csv").save()
 
     val Array(trainingData, testData) = balancedData.randomSplit(Array(0.7, 0.3))
 
