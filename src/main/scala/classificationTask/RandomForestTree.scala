@@ -4,12 +4,14 @@ import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
-import org.apache.spark.ml.linalg.Vectors
+import org.apache.spark.ml.linalg.{DenseMatrix, Vectors}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.mllib.evaluation.{BinaryClassificationMetrics, MulticlassMetrics}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{col, input_file_name, regexp_extract, udf}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.sparkproject.dmg.pmml.ConfusionMatrix
 
 object RandomForestTree {
   def main(args: Array[String]): Unit = {
@@ -68,58 +70,83 @@ object RandomForestTree {
     val predictionsAndLabels = bestModel.transform(testData).select("prediction", label)
     predictionsAndLabels.show()
 
-    val accuracy = evaluator.evaluate(predictionsAndLabels)
-
-    val evaluator2 = new MulticlassClassificationEvaluator()
-      .setMetricName("weightedPrecision")
-      .setLabelCol(label)
-      .setPredictionCol("prediction")
-    val weightedPrecision = evaluator2.evaluate(predictionsAndLabels)
-
-    val evaluator3 = new MulticlassClassificationEvaluator()
-      .setMetricName("weightedRecall")
-      .setLabelCol(label)
-      .setPredictionCol("prediction")
-    val weightedRecall = evaluator3.evaluate(predictionsAndLabels)
-
-    val evaluator4 = new MulticlassClassificationEvaluator()
-      .setMetricName("f1")
-      .setLabelCol(label)
-      .setPredictionCol("prediction")
-    val f1 = evaluator4.evaluate(predictionsAndLabels)
-
-
-    val evaluator5 = new BinaryClassificationEvaluator()
-      .setLabelCol(label)
-      .setRawPredictionCol("prediction")
-      .setMetricName("areaUnderROC")
-    val areaUnderROC = evaluator5.evaluate(predictionsAndLabels)
-
-
-    // Extract the scores and labels from the predictions
-    val scoresAndLabels = predictionsAndLabels.select("probability", label)
-      .rdd.map(row => (row.getAs[org.apache.spark.ml.linalg.Vector](0)(1), row.getDouble(1)))
-
-    // Instantiate a BinaryClassificationMetrics object
-    val metrics = new BinaryClassificationMetrics(scoresAndLabels)
-
-    // Compute the ROC curve for each label
-    val rocCurves = metrics.roc()
-
-    // Print the ROC curve for each label
-    for (i <- 0 until 3) {
-      //todo:println(s"ROC curve for label $i: ${rocCurves(i).collect().toList}")
-    }
-
-    println(s"Accuracy: $accuracy")
-    println(s"weightedPrecision: $weightedPrecision")
-    println(s"weightedRecall: $weightedRecall")
-    println(s"f1: $f1")
-    println(s"areaUnderROC: $areaUnderROC")
     println(s"Number of trees: $rfModel.getNumTrees")
     println(s"Max depth: $rfModel.getMaxDepth")
 
-    //bestModel.write.overwrite().save("model")
+
+    val predictionAndLabelsEvaluation = predictionsAndLabels.select(col("prediction"), col(label).cast("Double"))
+      .rdd.map(x => (x(0).asInstanceOf[Double], x(1).asInstanceOf[Double]))
+    // Instantiate metrics object
+    val metrics = new MulticlassMetrics(predictionAndLabelsEvaluation)
+    // Confusion matrix
+    println("Confusion matrix:")
+    println(metrics.confusionMatrix)
+
+    // Overall Statistics
+    val accuracys = metrics.accuracy
+    println("Summary Statistics")
+    println(s"Accuracy = $accuracys")
+
+    // Precision by label
+    val labels = metrics.labels
+    labels.foreach { l =>
+      println(s"Precision($l) = " + metrics.precision(l))
+    }
+
+    // Recall by label
+    labels.foreach { l =>
+      println(s"Recall($l) = " + metrics.recall(l))
+    }
+
+    // False positive rate by label
+    labels.foreach { l =>
+      println(s"FPR($l) = " + metrics.falsePositiveRate(l))
+    }
+
+    // True positive rate by label
+    labels.foreach { l =>
+      println(s"TPR($l) = " + metrics.truePositiveRate(l))
+    }
+
+
+    // F-measure by label
+    labels.foreach { l =>
+      println(s"F1-Score($l) = " + metrics.fMeasure(l))
+    }
+
+
+    // Weighted stats
+    println(s"Weighted precision: ${metrics.weightedPrecision}")
+    println(s"Weighted recall: ${metrics.weightedRecall}")
+    println(s"Weighted F1 score: ${metrics.weightedFMeasure}")
+    println(s"Weighted false positive rate: ${metrics.weightedFalsePositiveRate}")
+
+    metrics.confusionMatrix.rowIter
+    // iterate over the elements in the confusion matrix and print them out
+    for (i <- 0 until metrics.confusionMatrix.numRows) {
+      for (j <- 0 until metrics.confusionMatrix.numCols) {
+        println(s"Element ($i, $j) = ${metrics.confusionMatrix(i, j)}")
+      }
+    }
+
+    //val predictionAndLabels = Seq((0.0, 0.0), (1.0, 1.0), (1.0, 0.0), (0.0, 1.0))
+    //val predictionAndLabelsRdd = spark.sparkContext.parallelize(predictionAndLabels)
+    //val metrics = new BinaryClassificationMetrics(predictionAndLabelsRdd)
+
+    labels.foreach { l =>
+      val modifiedPredictionAndLabelsRdd = predictionAndLabelsEvaluation.map { case (prediction, lb) =>
+        // Operate on the value of prediction here
+        if(prediction == lb && lb == l){
+          (1, 1)
+        }else if(prediction == lb && lb != l){
+          (0,0)
+        }else if(prediction != lb  ){
+          ()
+        }
+      }
+    }
+
+
     spark.stop()
 
   }
