@@ -1,5 +1,6 @@
 package classificationTask
 
+import org.apache.hadoop.shaded.org.eclipse.jetty.websocket.common.frames.DataFrame
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
@@ -7,10 +8,11 @@ import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.linalg.{DenseMatrix, Vectors}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.mllib.evaluation.{BinaryClassificationMetrics, MulticlassMetrics}
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, input_file_name, regexp_extract, udf}
+import org.apache.spark.sql.{Dataset, Row, SparkSession}
+import org.apache.spark.sql.functions.{col, input_file_name, regexp_extract, udf, when}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.rdd.RDD
 import org.sparkproject.dmg.pmml.ConfusionMatrix
 
 object RandomForestTree {
@@ -27,11 +29,21 @@ object RandomForestTree {
       .option("header", "true")
       .option("inferSchema", "true")
       .load("dataset/marketing_campaign_cleaned_classification_3.csv")
-    val Array(trainingData, testData) = personality.randomSplit(Array(0.7, 0.3))
+
+    val label = "Income"
+
+    val label_0 = personality.filter(col(label) === 0)
+    val label_1 = personality.filter(col(label) === 1)
+    val label_2 = personality.filter(col(label) === 2)
+    val smallestClassSize = Seq(label_0.count(), label_1.count(), label_2.count()).min
+    val balancedData = label_0.limit(smallestClassSize.toInt).union(label_1.limit(smallestClassSize.toInt)).union(label_2.limit(smallestClassSize.toInt))
+    balancedData.write.format("csv").option("header",1).option("path", "dataset/marketing_campaign_balanced_classification.csv").save()
+
+    val Array(trainingData, testData) = balancedData.randomSplit(Array(0.7, 0.3))
 
     personality.show()
 
-    val label = "Income"
+
     val assembler = new VectorAssembler()
       .setInputCols(personality.columns.filter(_ != label))
       .setOutputCol("features")
@@ -121,31 +133,8 @@ object RandomForestTree {
     println(s"Weighted F1 score: ${metrics.weightedFMeasure}")
     println(s"Weighted false positive rate: ${metrics.weightedFalsePositiveRate}")
 
-    metrics.confusionMatrix.rowIter
-    // iterate over the elements in the confusion matrix and print them out
-    for (i <- 0 until metrics.confusionMatrix.numRows) {
-      for (j <- 0 until metrics.confusionMatrix.numCols) {
-        println(s"Element ($i, $j) = ${metrics.confusionMatrix(i, j)}")
-      }
-    }
-
     //val predictionAndLabels = Seq((0.0, 0.0), (1.0, 1.0), (1.0, 0.0), (0.0, 1.0))
     //val predictionAndLabelsRdd = spark.sparkContext.parallelize(predictionAndLabels)
-    //val metrics = new BinaryClassificationMetrics(predictionAndLabelsRdd)
-
-    labels.foreach { l =>
-      val modifiedPredictionAndLabelsRdd = predictionAndLabelsEvaluation.map { case (prediction, lb) =>
-        // Operate on the value of prediction here
-        if(prediction == lb && lb == l){
-          (1, 1)
-        }else if(prediction == lb && lb != l){
-          (0,0)
-        }else if(prediction != lb  ){
-          ()
-        }
-      }
-    }
-
 
     spark.stop()
 
