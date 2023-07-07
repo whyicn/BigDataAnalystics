@@ -39,13 +39,14 @@ object RandomForestTree {
     val balancedData = label_0.limit(smallestClassSize.toInt).union(label_1.limit(smallestClassSize.toInt)).union(label_2.limit(smallestClassSize.toInt))
     //balancedData.write.format("csv").option("header",1).option("path", "dataset/marketing_campaign_balanced_classification.csv").save()
 
-    val Array(trainingData, testData) = balancedData.randomSplit(Array(0.7, 0.3))
+    // Split the data into training and test sets (30% held out for testing)
+    val Array(trainingData, testData) = balancedData.randomSplit(Array(0.7, 0.3), seed = 1234L)
 
     personality.show()
 
 
     val assembler = new VectorAssembler()
-      .setInputCols(personality.columns.filter(_ != label))
+      .setInputCols(balancedData.columns.filter(_ != label))
       .setOutputCol("features")
 
     val rf = new RandomForestClassifier()
@@ -73,7 +74,7 @@ object RandomForestTree {
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(5)
 
-    val cvModel = cv.fit(personality)
+    val cvModel = cv.fit(balancedData)
 
     val bestModel = cvModel.bestModel.asInstanceOf[PipelineModel]
     val rfModel = bestModel.stages.last.asInstanceOf[RandomForestClassificationModel]
