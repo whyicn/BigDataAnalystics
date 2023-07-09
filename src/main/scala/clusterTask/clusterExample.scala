@@ -1,5 +1,0 @@
-package clusterTask
-
-object clusterExample {
-
-}
