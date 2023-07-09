@@ -28,7 +28,7 @@ object RandomForestTree {
     val personality = spark.read.format("csv")
       .option("header", "true")
       .option("inferSchema", "true")
-      .load("dataset/marketing_campaign_cleaned_classification_3.csv")
+      .load("dataset/marketing_campaign_cleaned_classification_rft.csv")
 
     val label = "Income"
 
