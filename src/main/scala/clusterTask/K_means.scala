@@ -19,10 +19,8 @@ object K_means {
       .option("inferSchema", "true")
       .load("dataset/marketing_campaign_cleaned_cluster_balance_1.csv")
 
-    val label = "Income"
-
     val assembler = new VectorAssembler()
-      .setInputCols(personality.columns.filter(_ != label))
+      .setInputCols(personality.columns)
       .setOutputCol("features")
 
     val data = assembler.transform(personality).select("features")
