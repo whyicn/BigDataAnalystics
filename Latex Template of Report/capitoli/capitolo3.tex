@@ -21,8 +21,6 @@ After executing the method \textit{weka.filters.unsupervised.instance.RemoveWith
 Discretization is the process of transferring continuous functions, models, variables, and equations into discrete counterparts.  
 In weka, there is a method \textit{weka.filters.unsupervised.attribute.Discretize} transform continuous variables into discrete ones. Discretization can also help to reduce the dimensionality of the data and improve the performance of some machine learning algorithms.
 
-\section{Aggregation} 
-
 \section{Sampling}
 Data sampling provides a collection of techniques that transform a training dataset in order to balance or better balance the class distribution.
 In this case, we sampling a balanced dataset accroding to the minimun number of Income attribute. After balancing the dataset, there have 650 insstance of each label for Income.
@@ -38,7 +36,7 @@ Dimensionality reduction is a technique of reducing the number of input variable
     \item \textbf{Complain}: The attribute contains little entropy.
 \end{itemize}
 
-There also some more attributes which record the customer accepted the offer in the campaign. These attributes were removed from the clustering task because they contained less information. After removing these features, the performance of clustering algorithms improved.
+There also some more attributes which record the customer accepted the offer in the campaign. These attributes were removed from the clustering task because they contained less entropy. After removing these features, the performance of clustering algorithms improved.
 \begin{itemize}
     \item \textbf{AcceptedCmp1}; \textbf{AcceptedCmp2}; \textbf{AcceptedCmp3} \textbf{AcceptedCmp4}; \textbf{AcceptedCmp5}
 \end{itemize}
