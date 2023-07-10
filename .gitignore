@@ -35,3 +35,21 @@ logs/
 
 /.idea/
 /target/
+
+
+# LaTeX files
+*.aux
+*.out
+*.synctex.gz
+
+# Bibliography files
+*.bbl
+*.bcf
+*.blg
+
+# Generated files
+*.fdb_latexmk
+*.fls
+
+# Other files to ignore
+auto/

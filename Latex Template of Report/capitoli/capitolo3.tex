@@ -1,0 +1,57 @@
+\chapter{Data Preparation}
+
+\section{Data Cleaning}
+
+\subsection{Missing Value}
+% List the data to be included/excluded and the reasons for these decisions
+Missing values are quite common in many real-life datasets. There are different ways of handling missing values with dataset examples.
+With this dataset, there is only one attribute with missing values and there are only a limited number of instances, then replaced this the rows with mean values is a reasonable approach.
+the method we used in weka is \textit{weka.filters.unsupervised.attribute.ReplaceMissingValues}
+Here is the detail of the Attribute Income which contains missing value.
+\begin{itemize}
+    \item \textbf{Income} 24 instance of missing value, 1\% to the total insstance;
+\end{itemize}
+
+
+\subsection{Remove Outlier}
+For this dataset there do existing some attribute which containing the Outlier, we use the method of \textit{weka.filters.unsupervised.attribute.InterquartileRange} to find out the Outliers of each attribute.
+After executing the method \textit{weka.filters.unsupervised.instance.RemoveWithValues} to remove the redundant value, two more attributes will be added which shows the Outliers and ExtremeValue. 
+
+\section{Discretization}
+Discretization is the process of transferring continuous functions, models, variables, and equations into discrete counterparts.  
+In weka, there is a method \textit{weka.filters.unsupervised.attribute.Discretize} transform continuous variables into discrete ones. Discretization can also help to reduce the dimensionality of the data and improve the performance of some machine learning algorithms.
+
+\section{Aggregation} 
+
+\section{Sampling}
+Data sampling provides a collection of techniques that transform a training dataset in order to balance or better balance the class distribution.
+In this case, we sampling a balanced dataset accroding to the minimun number of Income attribute. After balancing the dataset, there have 650 insstance of each label for Income.
+\section{Dimensionality Reduction}
+Dimensionality reduction is a technique of reducing the number of input variables or features in a dataset. It aims to obtain a set of principal or lower-dimensional variables that capture the essence or structure of the data.
+\subsection{Eliminate irrelevant}
+
+\begin{itemize}
+    \item \textbf{Dt\_Customer}: After modifying the attribute Dt\_Customer to the uniform format and putting it into the model, the model did not perform well in the processing phase for both clustering and classification. However, when it was deleted from the features, the performance of the task improved.
+    \item \textbf{ID}: The ID is irrelevant to the training process.
+    \item \textbf{Z\_CostContact}: All items are the same.
+    \item \textbf{Z\_Revenue}: All items are the same.
+    \item \textbf{Complain}: The attribute contains little entropy.
+\end{itemize}
+
+There also some more attributes which record the customer accepted the offer in the campaign. These attributes were removed from the clustering task because they contained less information. After removing these features, the performance of clustering algorithms improved.
+\begin{itemize}
+    \item \textbf{AcceptedCmp1}; \textbf{AcceptedCmp2}; \textbf{AcceptedCmp3} \textbf{AcceptedCmp4}; \textbf{AcceptedCmp5}
+\end{itemize}
+
+\section{Feature Creation}
+Using the method \textit{weka.filters.unsupervised.attribute.Discretize} that discretizes a range of numeric attribute, the attributes which used the method are listed bellow.
+\begin{itemize}
+    \item \textbf{Year\_Birth}: the year of birth are splite into three nominal attributes.
+    \item \textbf{Income}: the Income are splite into three nominal attributes also as the classification label.
+\end{itemize}
+
+
+\section{Attribute Transformation}
+The mothod of \textit{weka.filters.unsupervised.attribute.OrdinalToNumeric} is an attribute filter that converts ordinal nominal attributes into numeric ones. This operator not only changes the type of selected attributes but it also maps all values of these attributes to numeric values. 
+After the operation of OrdinalToNumeric, this will allow for the use of numerical algorithms such as those presented in the Numerical Algorithms
+

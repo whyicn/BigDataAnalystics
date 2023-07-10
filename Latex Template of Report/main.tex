@@ -1,0 +1,126 @@
+\documentclass[a4paper,12pt]{report}
+\linespread{1.5}
+\usepackage{geometry}
+\geometry{top=3cm,bottom=3cm,left=3.5cm,right=3.5cm} % Impostiamo il valore dei margini.
+\usepackage[utf8]{inputenc}
+\usepackage{tikz,pgf}
+\usepackage{indentfirst}
+\usepackage{amsfonts}
+\usepackage[english]{babel} %% Abbiamo istruito LaTeX ad usare la lingua italiana.
+\usepackage{todonotes}
+\usepackage{subfig}
+\usepackage{fancyhdr}
+\setlength{\parindent}{1cm}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{csquotes}
+\usepackage{amsmath}
+\usepackage{numprint}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{tocbibind}
+\usepackage{titling}
+\usepackage{wrapfig}
+\usepackage{graphics}
+\usepackage[bookmarksopen,bookmarksdepth=2,breaklinks=true,colorlinks=true,urlcolor=black,linkcolor=black]{hyperref}
+\graphicspath{{imgs/}} %% cartella dalla quale ricavare le immagini %%
+\usepackage{booktabs}
+\usepackage{float}
+
+
+\setlength {\marginparwidth }{2cm} 
+\pgfplotsset{compat=1.16}
+
+\newenvironment{dedication}
+  {\clearpage           % we want a new page
+   \thispagestyle{empty}% no header and footer
+   \vspace*{\stretch{1}}% some space at the top 
+   \itshape             % the text is in italics
+   \raggedleft          % flush to the right margin
+  }
+   {\par % end the paragraph
+   \vspace{\stretch{3}} % space at bottom is three times that at the top
+   \clearpage           % finish off the page
+  }
+  
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+\textbf{\LARGE University of Calabria}\\
+\textbf{Dipartimento di Ingegneria Informatica, Modellistica, Elettronica e Sistemistica - DIMES}\\
+\vskip 6pt
+\hrule
+\vskip 8pt
+\includegraphics[width=0.13\linewidth]{logo.png}
+\vskip 8pt
+\textbf{Master’s degree course in Computer Engineering for the Internet of Things}
+\vskip 32pt
+Big Data Analystics
+
+\vskip 70pt
+{ \huge \bfseries 
+Income Predict and Customer Clustering
+}\\[0.4cm]
+\vskip 7pt
+
+\vskip 100pt
+
+\begin{tabular}{p{8cm}p{6cm}}
+Respective Faculty: & Authors:\\
+Prof.~Andrea Tagarelli & Wang Hongyu 225200 \\
+Prof.ssa Lucio La Cava & Yang Qing xxxxxx \\
+ & Najeebullah Shirzad
+ xxxxxx \\
+
+\end{tabular}
+
+%\begin{tabular}{p{8cm}p{8cm}}
+%\includegraphics[width=0.3\linewidth]{imgs/firma.jpg}
+%&
+%\includegraphics[width=0.3\linewidth]{imgs/firma.jpg}
+%\end{tabular}
+
+\vskip 60pt
+\hrule
+\vskip 6pt
+Anno Accademico 2022/2023
+\vfill
+\end{center}
+
+\end{titlepage}
+
+\begin{dedication}
+Namaste
+\end{dedication}
+
+%% Corpo della tesi %%
+
+%\chapter*{Sommario} %% In questa zona inseriamo l'abstract del nostro documento. %%
+%Inserisci abstract: ...
+
+
+
+\tableofcontents
+\newpage
+\input{capitoli/capitolo1}
+\input{capitoli/capitolo2}
+\input{capitoli/capitolo3}
+\input{capitoli/capitolo4}
+\input{capitoli/capitolo5}
+%\input{capitoli/capitolo6}
+%Eliminare/Aggiungere/Personalizzare i capitolo nella cartella "capitoli"
+
+%\chapter*{Conclusioni} In questo modo non comparirà dell'indice
+
+%\begin{thebibliography}{100} %% 100 rappresenta il n° massimo di voci all'interno della bibliografia: può essere modificato a vostro piacimento. %%
+%\bibitem{[1]:}
+%\bibitem{[2]:}
+%\bibitem{[3]:}
+%\bibitem{[4]:}
+
+%\end{thebibliography}
+
+%\chapter*{Ringraziamenti}
+%Inserisci frasi sdolcinate: ...
+\end{document}
