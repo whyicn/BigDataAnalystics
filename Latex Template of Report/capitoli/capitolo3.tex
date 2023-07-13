@@ -6,7 +6,9 @@
 % List the data to be included/excluded and the reasons for these decisions
 Missing values are quite common in many real-life datasets. There are different ways of handling missing values with dataset examples.
 With this dataset, there is only one attribute with missing values and there are only a limited number of instances, then replaced this the rows with mean values is a reasonable approach.
-the method we used in weka is \textit{weka.filters.unsupervised.attribute.ReplaceMissingValues}
+the method we used in weka is 
+
+\textit{weka.filters.unsupervised.attribute.ReplaceMissingValues}
 Here is the detail of the Attribute Income which contains missing value.
 \begin{itemize}
     \item \textbf{Income} 24 instance of missing value, 1\% to the total insstance;
@@ -14,12 +16,18 @@ Here is the detail of the Attribute Income which contains missing value.
 
 
 \subsection{Remove Outlier}
-For this dataset there do existing some attribute which containing the Outlier, we use the method of \textit{weka.filters.unsupervised.attribute.InterquartileRange} to find out the Outliers of each attribute.
-After executing the method \textit{weka.filters.unsupervised.instance.RemoveWithValues} to remove the redundant value, two more attributes will be added which shows the Outliers and ExtremeValue. 
+For this dataset there do existing some attribute which containing the Outlier, we use the method of 
+
+\textit{weka.filters.unsupervised.attribute.InterquartileRange} to find out the Outliers of each attribute.
+After executing the method 
+
+\textit{weka.filters.unsupervised.instance.RemoveWithValues} to remove the redundant value, two more attributes will be added which shows the Outliers and ExtremeValue. 
 
 \section{Discretization}
 Discretization is the process of transferring continuous functions, models, variables, and equations into discrete counterparts.  
-In weka, there is a method \textit{weka.filters.unsupervised.attribute.Discretize} transform continuous variables into discrete ones. Discretization can also help to reduce the dimensionality of the data and improve the performance of some machine learning algorithms.
+In weka, there is a method 
+
+\textit{weka.filters.unsupervised.attribute.Discretize} transform continuous variables into discrete ones. Discretization can also help to reduce the dimensionality of the data and improve the performance of some machine learning algorithms.
 
 \section{Sampling}
 Data sampling provides a collection of techniques that transform a training dataset in order to balance or better balance the class distribution.
@@ -50,6 +58,8 @@ Using the method \textit{weka.filters.unsupervised.attribute.Discretize} that di
 
 
 \section{Attribute Transformation}
-The mothod of \textit{weka.filters.unsupervised.attribute.OrdinalToNumeric} is an attribute filter that converts ordinal nominal attributes into numeric ones. This operator not only changes the type of selected attributes but it also maps all values of these attributes to numeric values. 
+The mothod of 
+
+\textit{weka.filters.unsupervised.attribute.OrdinalToNumeric} is an attribute filter that converts ordinal nominal attributes into numeric ones. This operator not only changes the type of selected attributes but it also maps all values of these attributes to numeric values. 
 After the operation of OrdinalToNumeric, this will allow for the use of numerical algorithms such as those presented in the Numerical Algorithms
 
